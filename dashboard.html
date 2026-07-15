@@ -11,7 +11,7 @@
             --card-bg: rgba(30, 41, 59, 0.7);
             --primary-color: #3b82f6;
             --success-color: #10b981;
-            --warning-color: #f59e0b;
+            --warning-color: #ef4444;
             --error-color: #ef4444;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
@@ -75,7 +75,6 @@
             }
         }
 
-        /* Live Clock Styles */
         .clock-container {
             background: rgba(15, 23, 42, 0.6);
             border: 1px solid var(--border-color);
@@ -130,7 +129,6 @@
             letter-spacing: 1px;
         }
 
-        /* Attendance Panel Styles */
         .attendance-panel {
             background: rgba(15, 23, 42, 0.4);
             border: 1px solid var(--border-color);
@@ -180,7 +178,7 @@
         }
 
         .btn-checkout {
-            background: rgba(245, 158, 11, 0.1);
+            background: rgba(239, 68, 68, 0.1);
             color: var(--warning-color);
             border: 1px solid var(--warning-color);
         }
@@ -198,7 +196,6 @@
             background: transparent;
         }
 
-        /* Record History Table Styles */
         .history-container {
             margin-top: 1rem;
             background: rgba(15, 23, 42, 0.6);
@@ -290,7 +287,6 @@
     <div class="bg-glow"></div>
 
     <div class="dashboard-card">
-        <!-- Live Clock -->
         <div class="clock-container">
             <div class="live-time" id="live-time">00:00:00 AM</div>
             <div class="live-date" id="live-date">Loading date...</div>
@@ -299,13 +295,11 @@
         <h1>Workspace Activated</h1>
         <p class="subtitle">NexusLink Operational Dashboard</p>
 
-        <!-- User Info -->
         <div class="user-info-box">
             <span>Identity Authenticated</span>
             <strong id="user-email">guest@nexuslink.com</strong>
         </div>
 
-        <!-- Attendance System -->
         <div class="attendance-panel">
             <div class="attendance-header">Time & Attendance</div>
             <div class="attendance-buttons">
@@ -314,7 +308,6 @@
                     Out</button>
             </div>
 
-            <!-- Dynamic Attendance History Log -->
             <div class="attendance-header"
                 style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">Attendance
                 History</div>
@@ -329,19 +322,16 @@
                         </tr>
                     </thead>
                     <tbody id="history-body">
-                        <!-- Table rows will render dynamically via JS -->
                     </tbody>
                 </table>
                 <div id="no-records-msg" class="no-records">No check-in activity recorded yet.</div>
             </div>
         </div>
 
-        <!-- Logout -->
         <button class="btn-logout" onclick="logout()">Terminate Session</button>
     </div>
 
     <script>
-        // Check Authentication Session
         const savedEmail = localStorage.getItem('loggedInUser');
         if (!savedEmail) {
             window.location.href = 'index.html';
@@ -349,7 +339,6 @@
             document.getElementById('user-email').textContent = savedEmail;
         }
 
-        // Live Clock Implementation
         function runClock() {
             const now = new Date();
             let hours = now.getHours();
@@ -371,62 +360,58 @@
         setInterval(runClock, 1000);
         runClock();
 
-        // Attendance Record and List Logic
         const checkInButton = document.getElementById('btn-checkin');
         const checkOutButton = document.getElementById('btn-checkout');
         const historyBody = document.getElementById('history-body');
         const noRecordsMsg = document.getElementById('no-records-msg');
 
         function getRecords() {
-            const data = localStorage.getItem('attendanceHistory');
+            const email = localStorage.getItem('loggedInUser') || 'guest';
+            const data = localStorage.getItem('attendanceHistory_' + email);
             return data ? JSON.parse(data) : [];
         }
 
         function saveRecords(records) {
-            localStorage.setItem('attendanceHistory', JSON.stringify(records));
+            const email = localStorage.getItem('loggedInUser') || 'guest';
+            localStorage.setItem('attendanceHistory_' + email, JSON.stringify(records));
         }
 
-        // Auto-fill absent days for working days (Sunday to Thursday)
         function fillAbsentDays() {
             const records = getRecords();
-            if (records.length === 0) return; // Fresh system, no previous records to compare
+            if (records.length === 0) return;
 
             const lastRecord = records[records.length - 1];
+            if (lastRecord.status === 'Absent') return;
+
             const lastDate = new Date(lastRecord.date);
-
             const today = new Date();
-            today.setHours(0, 0, 0, 0); // Clear time for accurate date comparison
+            today.setHours(0, 0, 0, 0);
 
-            // Start checking from the day after the last recorded day
             let checkDate = new Date(lastDate);
             checkDate.setDate(checkDate.getDate() + 1);
             checkDate.setHours(0, 0, 0, 0);
 
             let updated = false;
 
-            // Loop through days until we reach today (excluding today)
             while (checkDate < today) {
                 const dayOfWeek = checkDate.getDay();
-
-                // JS Days: 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday
-                // 5 = Friday (Weekend), 6 = Saturday (Weekend)
                 const isWorkingDay = (dayOfWeek >= 0 && dayOfWeek <= 4);
 
                 if (isWorkingDay) {
                     const dateString = checkDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
-                    // Push an Absent record for the missed working day
-                    records.push({
-                        id: checkDate.getTime(),
-                        date: dateString,
-                        checkIn: '--:--',
-                        checkOut: '--:--',
-                        status: 'Absent'
-                    });
-                    updated = true;
+                    const alreadyExists = records.some(r => r.date === dateString);
+                    if (!alreadyExists) {
+                        records.push({
+                            id: checkDate.getTime(),
+                            date: dateString,
+                            checkIn: '--:--',
+                            checkOut: '--:--',
+                            status: 'Absent'
+                        });
+                        updated = true;
+                    }
                 }
-
-                // Move to the next day
                 checkDate.setDate(checkDate.getDate() + 1);
             }
 
@@ -448,7 +433,6 @@
             noRecordsMsg.style.display = 'none';
             document.getElementById('history-table').style.display = 'table';
 
-            // Render records from newest to oldest
             records.slice().reverse().forEach(record => {
                 const tr = document.createElement('tr');
 
@@ -489,7 +473,6 @@
 
             const records = getRecords();
 
-            // Prevent double check-in on the same day
             const alreadyRegisteredToday = records.some(r => r.date === dateString);
             if (alreadyRegisteredToday) {
                 alert("You have already recorded activity for today!");
@@ -511,7 +494,6 @@
             checkButtonStates();
         }
 
-        // Complete active attendance record
         function checkOut() {
             const now = new Date();
             const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -535,7 +517,6 @@
             window.location.href = 'index.html';
         }
 
-        // Initialize system on load
         fillAbsentDays();
         updateHistoryUI();
         checkButtonStates();
