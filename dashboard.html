@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Workspace - NexusLink Systems</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --primary-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-y: auto;
+            padding: 2rem 0;
+        }
+
+        .bg-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, rgba(0, 0, 0, 0) 75%);
+            filter: blur(80px);
+            z-index: -1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .dashboard-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            padding: 2.5rem;
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            max-width: 600px;
+            width: 90%;
+            animation: cardAppear 0.5s ease;
+        }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Live Clock Styles */
+        .clock-container {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .live-time {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+
+        .live-date {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .user-info-box {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            word-break: break-all;
+        }
+
+        .user-info-box span {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Attendance Panel Styles */
+        .attendance-panel {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .attendance-header {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .attendance-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .btn-attendance {
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .btn-checkin {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+
+        .btn-checkin:hover:not(:disabled) {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-checkout {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+            border: 1px solid var(--warning-color);
+        }
+
+        .btn-checkout:hover:not(:disabled) {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .btn-attendance:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            border-color: var(--border-color);
+            color: var(--text-muted);
+            background: transparent;
+        }
+
+        /* Record History Table Styles */
+        .history-container {
+            margin-top: 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+
+        .history-table th {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-muted);
+            padding: 10px 12px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+        .history-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            color: var(--text-main);
+        }
+
+        .history-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-active {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--primary-color);
+        }
+
+        .badge-completed {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success-color);
+        }
+
+        .badge-absent {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--error-color);
+        }
+
+        .no-records {
+            padding: 1.5rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .btn-logout {
+            width: 100%;
+            padding: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error-color);
+            color: #fca5a5;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 1rem;
+        }
+
+        .btn-logout:hover {
+            background: var(--error-color);
+            color: #ffffff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg-glow"></div>
+
+    <div class="dashboard-card">
+        <!-- Live Clock -->
+        <div class="clock-container">
+            <div class="live-time" id="live-time">00:00:00 AM</div>
+            <div class="live-date" id="live-date">Loading date...</div>
+        </div>
+
+        <h1>Workspace Activated</h1>
+        <p class="subtitle">NexusLink Operational Dashboard</p>
+
+        <!-- User Info -->
+        <div class="user-info-box">
+            <span>Identity Authenticated</span>
+            <strong id="user-email">guest@nexuslink.com</strong>
+        </div>
+
+        <!-- Attendance System -->
+        <div class="attendance-panel">
+            <div class="attendance-header">Time & Attendance</div>
+            <div class="attendance-buttons">
+                <button id="btn-checkin" class="btn-attendance btn-checkin" onclick="checkIn()">Check In</button>
+                <button id="btn-checkout" class="btn-attendance btn-checkout" onclick="checkOut()" disabled>Check
+                    Out</button>
+            </div>
+
+            <!-- Dynamic Attendance History Log -->
+            <div class="attendance-header"
+                style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">Attendance
+                History</div>
+            <div class="history-container">
+                <table class="history-table" id="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>In</th>
+                            <th>Out</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-body">
+                        <!-- Table rows will render dynamically via JS -->
+                    </tbody>
+                </table>
+                <div id="no-records-msg" class="no-records">No check-in activity recorded yet.</div>
+            </div>
+        </div>
+
+        <!-- Logout -->
+        <button class="btn-logout" onclick="logout()">Terminate Session</button>
+    </div>
+
+    <script>
+        // Check Authentication Session
+        const savedEmail = localStorage.getItem('loggedInUser');
+        if (!savedEmail) {
+            window.location.href = 'index.html';
+        } else {
+            document.getElementById('user-email').textContent = savedEmail;
+        }
+
+        // Live Clock Implementation
+        function runClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            let seconds = now.getSeconds();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+
+            const timeString = `${hours}:${minutes}:${seconds} ${ampm}`;
+            document.getElementById('live-time').textContent = timeString;
+
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('live-date').textContent = now.toLocaleDateString('en-US', options);
+        }
+        setInterval(runClock, 1000);
+        runClock();
+
+        // Attendance Record and List Logic
+        const checkInButton = document.getElementById('btn-checkin');
+        const checkOutButton = document.getElementById('btn-checkout');
+        const historyBody = document.getElementById('history-body');
+        const noRecordsMsg = document.getElementById('no-records-msg');
+
+        function getRecords() {
+            const data = localStorage.getItem('attendanceHistory');
+            return data ? JSON.parse(data) : [];
+        }
+
+        function saveRecords(records) {
+            localStorage.setItem('attendanceHistory', JSON.stringify(records));
+        }
+
+        // Auto-fill absent days for working days (Sunday to Thursday)
+        function fillAbsentDays() {
+            const records = getRecords();
+            if (records.length === 0) return; // Fresh system, no previous records to compare
+
+            const lastRecord = records[records.length - 1];
+            const lastDate = new Date(lastRecord.date);
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Clear time for accurate date comparison
+
+            // Start checking from the day after the last recorded day
+            let checkDate = new Date(lastDate);
+            checkDate.setDate(checkDate.getDate() + 1);
+            checkDate.setHours(0, 0, 0, 0);
+
+            let updated = false;
+
+            // Loop through days until we reach today (excluding today)
+            while (checkDate < today) {
+                const dayOfWeek = checkDate.getDay();
+
+                // JS Days: 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday
+                // 5 = Friday (Weekend), 6 = Saturday (Weekend)
+                const isWorkingDay = (dayOfWeek >= 0 && dayOfWeek <= 4);
+
+                if (isWorkingDay) {
+                    const dateString = checkDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+                    // Push an Absent record for the missed working day
+                    records.push({
+                        id: checkDate.getTime(),
+                        date: dateString,
+                        checkIn: '--:--',
+                        checkOut: '--:--',
+                        status: 'Absent'
+                    });
+                    updated = true;
+                }
+
+                // Move to the next day
+                checkDate.setDate(checkDate.getDate() + 1);
+            }
+
+            if (updated) {
+                saveRecords(records);
+            }
+        }
+
+        function updateHistoryUI() {
+            const records = getRecords();
+            historyBody.innerHTML = '';
+
+            if (records.length === 0) {
+                noRecordsMsg.style.display = 'block';
+                document.getElementById('history-table').style.display = 'none';
+                return;
+            }
+
+            noRecordsMsg.style.display = 'none';
+            document.getElementById('history-table').style.display = 'table';
+
+            // Render records from newest to oldest
+            records.slice().reverse().forEach(record => {
+                const tr = document.createElement('tr');
+
+                let badgeClass = 'badge-completed';
+                if (record.status === 'Active') {
+                    badgeClass = 'badge-active';
+                } else if (record.status === 'Absent') {
+                    badgeClass = 'badge-absent';
+                }
+
+                tr.innerHTML = `
+                    <td>${record.date}</td>
+                    <td>${record.checkIn}</td>
+                    <td>${record.checkOut}</td>
+                    <td><span class="badge ${badgeClass}">${record.status}</span></td>
+                `;
+                historyBody.appendChild(tr);
+            });
+        }
+
+        function checkButtonStates() {
+            const records = getRecords();
+            const activeSession = records.find(r => r.status === 'Active');
+
+            if (activeSession) {
+                checkInButton.disabled = true;
+                checkOutButton.disabled = false;
+            } else {
+                checkInButton.disabled = false;
+                checkOutButton.disabled = true;
+            }
+        }
+
+        function checkIn() {
+            const now = new Date();
+            const dateString = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+            const records = getRecords();
+
+            // Prevent double check-in on the same day
+            const alreadyRegisteredToday = records.some(r => r.date === dateString);
+            if (alreadyRegisteredToday) {
+                alert("You have already recorded activity for today!");
+                return;
+            }
+
+            const newRecord = {
+                id: Date.now(),
+                date: dateString,
+                checkIn: timeString,
+                checkOut: '--:--',
+                status: 'Active'
+            };
+
+            records.push(newRecord);
+            saveRecords(records);
+
+            updateHistoryUI();
+            checkButtonStates();
+        }
+
+        // Complete active attendance record
+        function checkOut() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+            let records = getRecords();
+
+            const activeIndex = records.findIndex(r => r.status === 'Active');
+            if (activeIndex !== -1) {
+                records[activeIndex].checkOut = timeString;
+                records[activeIndex].status = 'Completed';
+            }
+
+            saveRecords(records);
+
+            updateHistoryUI();
+            checkButtonStates();
+        }
+
+        function logout() {
+            localStorage.removeItem('loggedInUser');
+            window.location.href = 'index.html';
+        }
+
+        // Initialize system on load
+        fillAbsentDays();
+        updateHistoryUI();
+        checkButtonStates();
+    </script>
+</body>
+
+</html>
