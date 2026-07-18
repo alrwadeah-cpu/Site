@@ -1,397 +1,212 @@
 <!DOCTYPE html>
-
 <html lang="en" dir="ltr">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <meta name="description"
         content="Secure Employee Portal for NexusLink Systems. Sign in to access your dashboard, secure applications, and corporate resources.">
-
     <title id="page-title">Employee Portal - NexusLink Systems</title>
-
     <link rel="stylesheet" href="style.css">
-
 </head>
 
 <body>
-
     <!-- Background Animated Glows -->
-
     <div class="bg-glow-container">
-
         <div class="bg-glow-1"></div>
-
         <div class="bg-glow-2"></div>
-
     </div>
 
-
-
     <!-- Main Container -->
-
     <main class="app-container">
 
-
-
         <!-- Controls: Language Toggler -->
-
         <header class="top-controls">
-
             <div class="lang-switcher" id="language-switcher" onclick="toggleLanguage()">
-
                 <div class="lang-slider" id="lang-slider"></div>
-
                 <button class="lang-btn active" id="btn-en" data-lang="en">EN</button>
-
                 <button class="lang-btn" id="btn-ar" data-lang="ar">العربية</button>
-
             </div>
-
         </header>
 
-
-
         <!-- Left Panel: Branding & Interactive Visuals -->
-
         <section class="brand-panel">
-
             <div class="logo-container">
-
                 <div class="logo-icon"></div>
-
                 <span>NexusLink Systems</span>
-
             </div>
-
-
 
             <!-- Canvas for particle background networking -->
-
             <canvas id="particle-canvas"></canvas>
 
-
-
             <div class="brand-content">
-
-                <h1 class="brand-title" id="brand-title">Empowering Corporate Innovation.</h1>
-
-                <p class="brand-desc" id="brand-desc">Access your secure workspace, cloud environments, and developer
-                    resources. NexusLink Systems delivers leading-edge IT infrastructure and solutions globally.</p>
-
+                <h1 class="brand-title" id="brand-title">Architecting the Future. Starting with Today.</h1>
+                <p class="brand-desc" id="brand-desc">Securely access the NexusLink core workspace to log your daily
+                    attendance, sync with your team, and drive global IT innovation. Your presence shapes our progress.
+                </p>
             </div>
-
-
 
             <div class="system-status">
-
                 <div class="status-dot"></div>
-
                 <span id="system-status-text">All Corporate Systems Operational</span>
-
             </div>
-
         </section>
 
-
-
         <!-- Right Panel: Login card container -->
-
         <section class="form-panel">
-
             <div class="login-card">
-
                 <!-- Loading state Overlay -->
-
                 <div class="loading-overlay" id="loading-overlay">
-
                     <div class="spinner"></div>
-
                     <div class="loading-text" id="loading-text">Verifying Credentials...</div>
-
                     <div class="loading-subtext" id="loading-subtext">Connecting to Secure LDAP Server</div>
-
                 </div>
-
-
 
                 <!-- Success state Overlay -->
-
                 <div class="success-overlay" id="success-overlay">
-
                     <div class="success-icon-container">✓</div>
-
                     <h2 class="success-title" id="success-title">Access Granted</h2>
-
                     <p class="success-desc" id="success-desc">Redirecting to NexusLink Dashboard. Welcome back!</p>
-
                     <button class="success-btn" id="success-btn" onclick="resetForm()">Return</button>
-
                 </div>
-
-
 
                 <!-- Server Error Message -->
-
                 <div class="server-error" id="server-error" style="display: none;">
-
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2">
-
                         <circle cx="12" cy="12" r="10"></circle>
-
                         <line x1="12" y1="8" x2="12" y2="12"></line>
-
                         <line x1="12" y1="16" x2="12.01" y2="16"></line>
-
                     </svg>
-
                     <span id="server-error-text"></span>
-
                     <button class="error-dismiss" onclick="dismissError()">✕</button>
-
                 </div>
-
-
 
                 <div class="card-header">
-
                     <h2 class="card-title" id="card-title">Employee Portal</h2>
-
                     <p class="card-subtitle" id="card-subtitle">Please authenticate to continue to your workspace</p>
-
                 </div>
 
-
-
                 <form id="login-form" onsubmit="handleLogin(event)">
-
                     <!-- Email / Employee ID Form Group -->
-
                     <div class="form-group" id="group-email">
-
                         <div class="input-container">
-
                             <input type="text" id="email" class="input-field" placeholder=" " required
                                 oninput="validateField('email')" autocomplete="username">
-
                             <!-- SVG Mail Icon -->
-
                             <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round">
-
                                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
                                 </path>
-
                                 <polyline points="22,6 12,13 2,6"></polyline>
-
                             </svg>
-
                             <label for="email" class="form-label" id="label-email">Corporate Email / Employee ID</label>
-
                         </div>
-
                         <div class="error-msg" id="error-email">
-
                             <!-- SVG Error Icon -->
-
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2">
-
                                 <circle cx="12" cy="12" r="10"></circle>
-
                                 <line x1="12" y1="8" x2="12" y2="12"></line>
-
                                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
-
                             </svg>
-
                             <span id="err-text-email">Please enter a valid corporate email (name@nexuslink.com)</span>
-
                         </div>
-
                     </div>
 
-
-
                     <!-- Password Form Group -->
-
                     <div class="form-group" id="group-password">
-
                         <div class="input-container">
-
                             <input type="password" id="password" class="input-field" placeholder=" " required
                                 oninput="validateField('password')" autocomplete="current-password">
-
                             <!-- SVG Lock Icon -->
-
                             <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round">
-
                                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-
                                 <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-
                             </svg>
-
-
 
                             <label for="password" class="form-label" id="label-password">Security Password</label>
 
-
-
                             <!-- Toggle Password visibility button -->
-
                             <button type="button" class="input-toggle" id="password-toggle"
                                 onclick="togglePasswordVisibility()" aria-label="Toggle Password Visibility">
-
                                 <!-- SVG Eye Icon -->
-
                                 <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round">
-
                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-
                                     <circle cx="12" cy="12" r="3"></circle>
-
                                 </svg>
-
                             </button>
-
                         </div>
-
                         <div class="error-msg" id="error-password">
-
                             <!-- SVG Error Icon -->
-
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2">
-
                                 <circle cx="12" cy="12" r="10"></circle>
-
                                 <line x1="12" y1="8" x2="12" y2="12"></line>
-
                                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
-
                             </svg>
-
                             <span id="err-text-password">Password must be at least 8 characters long</span>
-
                         </div>
-
                     </div>
-
-
 
                     <!-- Options Row: Remember Me & Forgot Password -->
-
                     <div class="options-row">
-
                         <label class="checkbox-container">
-
                             <input type="checkbox" id="remember-me">
-
                             <span class="custom-checkbox">
-
                                 <!-- SVG Checkmark Icon -->
-
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-
                                     <polyline points="20 6 9 17 4 12"></polyline>
-
                                 </svg>
-
                             </span>
-
                             <span id="label-remember">Remember Device</span>
-
                         </label>
-
                         <a href="#" class="forgot-link" id="link-forgot" onclick="alertForgot(event)">Forgot
                             Password?</a>
-
                     </div>
 
-
-
                     <!-- Submit Login Button -->
-
                     <button type="submit" class="submit-btn" id="btn-submit">
-
                         <span id="btn-submit-text">Authorize Session</span>
-
                         <!-- SVG Login Arrow -->
-
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-
                             <line x1="5" y1="12" x2="19" y2="12"></line>
-
                             <polyline points="12 5 19 12 12 19"></polyline>
-
                         </svg>
-
                     </button>
-
                 </form>
 
-
-
                 <!-- SSO Alternative Option -->
-
                 <div class="sso-divider">
-
                     <span id="sso-text">or authenticate via</span>
-
                 </div>
-
-
 
                 <button class="sso-btn" onclick="triggerSSO()">
-
                     <!-- SVG Secure Shield / Badge -->
-
                     <svg class="sso-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-
                     </svg>
-
                     <span id="btn-sso-text">Corporate SSO Security Key</span>
-
                 </button>
 
-
-
                 <!-- Support link / footer -->
-
                 <div class="card-footer">
-
                     <span id="footer-text">Need assistance? Contact </span>
-
                     <a href="#" class="support-link" id="link-support" onclick="alertSupport(event)">IT Support Desk</a>
-
                 </div>
-
             </div>
-
         </section>
-
     </main>
 
-
-
     <script src="script.js"></script>
-
 </body>
 
 </html>
