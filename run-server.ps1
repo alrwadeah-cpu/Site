@@ -12,39 +12,51 @@ try {
     Write-Host "=============================================="
     
     while ($listener.IsListening) {
-        $context = $listener.GetContext()
-        $request = $context.Request
-        $response = $context.Response
-        
-        # Get path and map to file system
-        $urlPath = $request.Url.LocalPath
-        if ($urlPath -eq "/") { $urlPath = "/index.html" }
-        
-        $filePath = Join-Path $root $urlPath
-        
-        if (Test-Path $filePath -PathType Leaf) {
-            $extension = [System.IO.Path]::GetExtension($filePath)
-            $contentType = switch ($extension) {
-                ".html" { "text/html; charset=utf-8" }
-                ".css"  { "text/css; charset=utf-8" }
-                ".js"   { "application/javascript; charset=utf-8" }
-                default { "application/octet-stream" }
-            }
+        $context = $null
+        try {
+            $context = $listener.GetContext()
+            $request = $context.Request
+            $response = $context.Response
             
-            $bytes = [System.IO.File]::ReadAllBytes($filePath)
-            $response.ContentType = $contentType
-            $response.ContentLength64 = $bytes.Length
-            $response.OutputStream.Write($bytes, 0, $bytes.Length)
-        } else {
-            $response.StatusCode = 404
-            $errBytes = [System.Text.Encoding]::UTF8.GetBytes("404 Not Found")
-            $response.OutputStream.Write($errBytes, 0, $errBytes.Length)
+            # Get path and map to file system
+            $urlPath = $request.Url.LocalPath
+            if ($urlPath -eq "/") { $urlPath = "/index.html" }
+            
+            $filePath = Join-Path $root $urlPath
+            
+            if (Test-Path $filePath -PathType Leaf) {
+                $extension = [System.IO.Path]::GetExtension($filePath)
+                $contentType = switch ($extension) {
+                    ".html" { "text/html; charset=utf-8" }
+                    ".css" { "text/css; charset=utf-8" }
+                    ".js" { "application/javascript; charset=utf-8" }
+                    default { "application/octet-stream" }
+                }
+                
+                $bytes = [System.IO.File]::ReadAllBytes($filePath)
+                $response.ContentType = $contentType
+                $response.ContentLength64 = $bytes.Length
+                $response.OutputStream.Write($bytes, 0, $bytes.Length)
+            }
+            else {
+                $response.StatusCode = 404
+                $errBytes = [System.Text.Encoding]::UTF8.GetBytes("404 Not Found")
+                $response.OutputStream.Write($errBytes, 0, $errBytes.Length)
+            }
+            $response.Close()
         }
-        $response.Close()
+        catch {
+            Write-Host "Warning: Request handling error: $_" -ForegroundColor Yellow
+            if ($context -and $context.Response) {
+                try { $context.Response.Close() } catch {}
+            }
+        }
     }
-} catch {
+}
+catch {
     Write-Error $_
-} finally {
+}
+finally {
     if ($listener) {
         $listener.Stop()
     }
